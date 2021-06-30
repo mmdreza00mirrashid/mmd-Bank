@@ -5,6 +5,15 @@ import java.net.Socket;
 
 public class Account {
     String name ,user ,pass ,phone ,mail;
+    long savingBalance=0,primaryBalance=0;
+    //server info
+    Socket mSocket;
+    int port=0505;
+    String serverAddress = "185.51.200.2";//for example
+    InputStream fromServerStream;
+    OutputStream toServerStream;
+    DataInputStream reader;
+    PrintWriter writer;
     public void transfer(final String serverAddress ,int port){
         OutputStream toServerStream;
         PrintWriter writer;
@@ -13,6 +22,7 @@ public class Account {
             Socket mSocket = new Socket("localhost", port);//will use server address later
             toServerStream = mSocket.getOutputStream();
             writer = new PrintWriter(toServerStream, true);
+            writer.println("Sign In");
             writer.println(name);
             writer.println(user);
             writer.println(pass);
@@ -22,5 +32,28 @@ public class Account {
             e.printStackTrace();
         }
 
+    }
+    public boolean login(String user , String pass){
+        try {
+            mSocket=new Socket("localhost", port);
+            fromServerStream = mSocket.getInputStream();
+            toServerStream = mSocket.getOutputStream();
+            reader = new DataInputStream(fromServerStream);
+            writer = new PrintWriter(toServerStream, true);
+            writer.println("Log In");
+            writer.println(user);
+            writer.println(pass);
+            if(reader.readBoolean()){
+                primaryBalance=Integer.parseInt(reader.readLine());
+                savingBalance=Integer.parseInt(reader.readLine());
+                return true;
+            }
+            else
+                return false;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
