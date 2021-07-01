@@ -2,10 +2,12 @@ package sample;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Account {
     String name ,user ,pass ,phone ,mail;
     long savingBalance=0,primaryBalance=0;
+    ArrayList<Transaction> history=new ArrayList<Transaction>();
     //server info
     Socket mSocket;
     int port=0505;
@@ -36,8 +38,8 @@ public class Account {
     public boolean login(String user , String pass){
         try {
             mSocket=new Socket("localhost", port);
-            fromServerStream = mSocket.getInputStream();
             toServerStream = mSocket.getOutputStream();
+            fromServerStream = mSocket.getInputStream();
             reader = new DataInputStream(fromServerStream);
             writer = new PrintWriter(toServerStream, true);
             writer.println("Log In");
@@ -55,5 +57,20 @@ public class Account {
             e.printStackTrace();
         }
         return false;
+    }
+    public void addTransaction(String comment ,long amount){
+        try {
+            Transaction transaction=new Transaction(amount ,comment);
+            mSocket=new Socket("localhost", port);
+            toServerStream = mSocket.getOutputStream();
+            writer = new PrintWriter(toServerStream, true);
+            writer.println("Add Transaction");
+            ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(toServerStream));
+            out.writeObject(transaction);
+            out.flush();
+            history.add(transaction);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

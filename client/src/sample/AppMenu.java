@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class AppMenu {
     Socket mSocket;
-    Account account;
+    Account account=new Account();
     int port=0505;
     String serverAddress = "185.51.200.2";//for example
     Stage window;
@@ -48,24 +49,68 @@ public class AppMenu {
         MenuBar menuBar=new MenuBar();
         menuBar.getMenus().add(accMenu);
         layout.setTop(menuBar);
+        VBox vBox=new VBox();
+        Label lblBalance=new Label();
+        lblBalance.setText("موجودی:"+account.primaryBalance+"");
+        lblBalance.setFont(Font.font("Tahoma", FontWeight.LIGHT ,50));
+        vBox.getChildren().add(lblBalance);
+        vBox.setAlignment(Pos.TOP_CENTER);
+        layout.setCenter(vBox);
         Scene scene=new Scene(layout ,600 ,600);
         window.setScene(scene);
         window.show();
 
     }
     public void AddAccount(){
-        String accountNumber;
-        try {
-            mSocket=new Socket("localhost", port);
-            fromServerStream = mSocket.getInputStream();
-            toServerStream = mSocket.getOutputStream();
-            reader = new DataInputStream(fromServerStream);
-            writer = new PrintWriter(toServerStream, true);
-            writer.println("Add Account");
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Text message= new Text("افتتاح حساب جدید");
+        grid.add(message ,1 ,1);
+        Label lblType=new Label("نوع حساب");
+        grid.add(lblType ,2,2);
+        CheckBox saving=new CheckBox("حساب پس انداز");
+        grid.add(saving ,1,2);
+        CheckBox primary=new CheckBox("حساب جاری");
+        grid.add(primary,0,2);
+        saving.setOnAction(e ->{
+            primary.setSelected(false);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        });
+        primary.setOnAction(e -> saving.setSelected(false));
+        Label lblPass=new Label("رمز عبور:");
+        grid.add(lblPass ,2,3);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1 ,3);
+        Label lblNum=new Label("شماره حساب: ");
+        lblNum.setFont(Font.font("Tahoma", FontWeight.LIGHT ,20));
+        lblNum.setVisible(false);
+        grid.add(lblNum ,1,4);
+        Button done=new Button("اتمام");
+        grid.add(done ,3,5);
+        Button back=new Button("بازگشت");
+        grid.add(back ,0 ,5);
+        back.setOnAction(e ->show());
+
+        done.setOnAction(e -> {
+            if(saving.isSelected()||primary.isSelected()){
+                if(!passwordField.getText().isEmpty()){
+                    Deposited acc;
+                    if(saving.isSelected())
+                        acc=new Deposited(passwordField.getText() ,AccType.SAVING);
+                    else
+                        acc=new Deposited(passwordField.getText() ,AccType.CURRENT);
+                    acc.transfer();
+                    lblNum.setText("شماره حساب: "+acc.accountNumber);
+                    lblNum.setVisible(true);
+                    passwordField.setVisible(false);
+                    done.setVisible(false);
+                }
+            }
+        });
+        window.setScene(new Scene(grid ,600 ,300));
 
     }
     public void login(){
