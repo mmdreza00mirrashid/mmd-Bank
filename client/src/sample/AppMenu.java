@@ -30,9 +30,9 @@ public class AppMenu {
         window=primaryStage;
         login();
     }
-    public void show() {
-
-        BorderPane layout=new BorderPane();
+    public MenuBar topMenu(){
+        Menu home=new Menu("خانه");
+        home.setOnAction(e ->show());
         Menu accMenu=new Menu("حساب");
         MenuItem addAccount=new MenuItem("افزودن حساب");
         addAccount.setOnAction(e ->AddAccount());
@@ -42,13 +42,24 @@ public class AppMenu {
             if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
                 login();
         });
-
         accMenu.getItems().addAll(addAccount ,manageAccount , new SeparatorMenuItem() ,logOut);
         String color="#37FF33";
-        accMenu.setStyle("-fx-background-color: " + color + ";");
+        //accMenu.setStyle("-fx-background-color: " + color + ";");
+
+        Menu activities=new Menu("عملیات های بانکی");
+        MenuItem deposit=new MenuItem("واریز");
+        deposit.setOnAction(e ->deposit());
+        MenuItem withdraw=new MenuItem("برداشت");
+        MenuItem transfer=new MenuItem("کارت به کارت");
+        activities.getItems().addAll(deposit ,withdraw ,transfer);
         MenuBar menuBar=new MenuBar();
-        menuBar.getMenus().add(accMenu);
-        layout.setTop(menuBar);
+        menuBar.getMenus().addAll(home ,accMenu ,activities);
+        return menuBar;
+    }
+    public void show() {
+        window.setTitle("Home page");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
         VBox vBox=new VBox();
         Label lblBalance=new Label();
         lblBalance.setText("موجودی:"+account.primaryBalance+"");
@@ -66,9 +77,8 @@ public class AppMenu {
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
         grid.setVgap(10);
+        window.setTitle("افتتاح حساب");
         grid.setPadding(new Insets(5, 10, 5, 10));
-        Text message= new Text("افتتاح حساب جدید");
-        grid.add(message ,1 ,1);
         Label lblType=new Label("نوع حساب");
         grid.add(lblType ,2,2);
         CheckBox saving=new CheckBox("حساب پس انداز");
@@ -88,10 +98,15 @@ public class AppMenu {
         lblNum.setFont(Font.font("Tahoma", FontWeight.LIGHT ,20));
         lblNum.setVisible(false);
         grid.add(lblNum ,1,4);
+        Label lblAlias=new Label("نام مستعار: ");
+        grid.add(lblAlias ,3 ,5);
+        TextField alias=new TextField();
+        alias.setPromptText("میتوانید خالی بگذارید");
+        grid.add(alias ,1 ,5);
         Button done=new Button("اتمام");
-        grid.add(done ,3,5);
+        grid.add(done ,3,6);
         Button back=new Button("بازگشت");
-        grid.add(back ,0 ,5);
+        grid.add(back ,0 ,6);
         back.setOnAction(e ->show());
 
         done.setOnAction(e -> {
@@ -99,10 +114,11 @@ public class AppMenu {
                 if(!passwordField.getText().isEmpty()){
                     Deposited acc;
                     if(saving.isSelected())
-                        acc=new Deposited(passwordField.getText() ,AccType.SAVING);
+                        acc=new Deposited(passwordField.getText() ,AccType.SAVING ,alias.getText());
                     else
-                        acc=new Deposited(passwordField.getText() ,AccType.CURRENT);
-                    acc.transfer();
+                        acc=new Deposited(passwordField.getText() ,AccType.CURRENT,alias.getText());
+                    acc.transferData();
+                    account.addDeposited(acc);
                     lblNum.setText("شماره حساب: "+acc.accountNumber);
                     lblNum.setVisible(true);
                     passwordField.setVisible(false);
@@ -231,6 +247,35 @@ public class AppMenu {
         window.setScene(scene);
         window.show();
 
+    }
+
+    public void deposit(){
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblPass=new Label("رمز عبور حساب خود را وارد کنید");
+        grid.add(lblPass ,1 ,0);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1,1);
+        Label lblSum=new Label("مبلغ مورد نظر را وارد کنید");
+        grid.add(lblSum ,1,2);
+        TextField textField=new TextField();
+        grid.add(textField ,1,3);
+        Button done=new Button("واریز");
+        grid.add(done ,3, 4);
+        done.setOnAction(e->{
+            if(!passwordField.getText().isEmpty() &&NumericCheck(textField.getText())){
+                //account.depositOperation(passwordField.getText() ,textField.getText());
+                show();
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
     }
     public boolean NumericCheck(String strNum){
         Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");

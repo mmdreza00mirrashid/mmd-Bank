@@ -8,10 +8,11 @@ public class Account {
     String name ,user ,pass ,phone ,mail;
     long savingBalance=0,primaryBalance=0;
     ArrayList<Transaction> history=new ArrayList<Transaction>();
+    ArrayList<Deposited> depositedAcc=new ArrayList<Deposited>();
     //server info
     Socket mSocket;
     int port=0505;
-    String serverAddress = "185.51.200.2";//for example
+    String serverAddress = "localhost";//for example
     InputStream fromServerStream;
     OutputStream toServerStream;
     DataInputStream reader;
@@ -21,7 +22,7 @@ public class Account {
         PrintWriter writer;
 
         try {
-            Socket mSocket = new Socket("localhost", port);//will use server address later
+            Socket mSocket = new Socket(serverAddress, port);//will use server address later
             toServerStream = mSocket.getOutputStream();
             writer = new PrintWriter(toServerStream, true);
             writer.println("Sign In");
@@ -37,7 +38,7 @@ public class Account {
     }
     public boolean login(String user , String pass){
         try {
-            mSocket=new Socket("localhost", port);
+            mSocket=new Socket(serverAddress, port);
             toServerStream = mSocket.getOutputStream();
             fromServerStream = mSocket.getInputStream();
             reader = new DataInputStream(fromServerStream);
@@ -58,10 +59,19 @@ public class Account {
         }
         return false;
     }
+
+    public void addDeposited(Deposited account){
+        depositedAcc.add(account);
+        for(Deposited deposited: depositedAcc){
+            System.out.println(deposited.password);
+        }
+
+    }
+
     public void addTransaction(String comment ,long amount){
         try {
             Transaction transaction=new Transaction(amount ,comment);
-            mSocket=new Socket("localhost", port);
+            mSocket=new Socket(serverAddress, port);
             toServerStream = mSocket.getOutputStream();
             writer = new PrintWriter(toServerStream, true);
             writer.println("Add Transaction");
@@ -72,5 +82,39 @@ public class Account {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    public boolean depositOperation(String password ,String sum){// remember this doesnt change server data center
+        try {
+            mSocket=new Socket(serverAddress, port);
+            toServerStream = mSocket.getOutputStream();
+            writer = new PrintWriter(toServerStream, true);
+            writer.println("Deposit Operation");
+            writer.println(password);
+            writer.println(sum);
+            ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(toServerStream));
+            out.writeObject(this);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;//fix this later
+
+    }
+    public Account update(){
+        Account input = null;
+        try {
+            mSocket=new Socket(serverAddress, port);
+            toServerStream = mSocket.getOutputStream();
+            writer = new PrintWriter(toServerStream, true);
+            writer.println("Update Info");
+            ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(mSocket.getInputStream()));
+            input= (Account) in.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return input;
+
     }
 }

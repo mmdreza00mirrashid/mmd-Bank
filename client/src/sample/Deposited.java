@@ -6,34 +6,34 @@ import javafx.stage.Stage;
 import java.io.*;
 import java.net.Socket;
 
-public class Deposited {
+public class Deposited implements Serializable{
     String accountNumber;
     AccType type;
-    String password;
-    private long balance;
+    String password ,alias=null;
+    long balance;
 
-    public Deposited(String pass ,AccType accType){
+    public Deposited(String pass ,AccType accType ,String alias){
         password=pass;
         type=accType;
         accountNumber=numGenerator();
         balance=0;
+        this.alias=alias;
     }
 
-    public void transfer(){
+    public void transferData(){
         Socket mSocket;
         int port=0505;
-        String serverAddress = "185.51.200.2";//for example
+        String serverAddress = "localhost";//for example
         OutputStream toServerStream;
         PrintWriter writer;
         try {
-            mSocket=new Socket("localhost", port);
+            mSocket=new Socket(serverAddress, port);
             toServerStream = mSocket.getOutputStream();
             writer = new PrintWriter(toServerStream, true);
             writer.println("Add Deposited Account");
-            writer.println(accountNumber);
-            writer.println(password);
-            writer.println(type.name());
-            writer.println(""+balance);
+            ObjectOutputStream out= new ObjectOutputStream(new BufferedOutputStream(mSocket.getOutputStream()));
+            out.writeObject(this);
+            out.flush();
 
         } catch (IOException e) {
             e.printStackTrace();

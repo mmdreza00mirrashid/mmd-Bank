@@ -51,12 +51,17 @@ class ClientManagement implements Runnable{
 
             String inputTest="Add Deposited Account";
             if(reader.readLine().equals(inputTest)){
-                for(int i=0;i<10;i++)
-                    System.out.println(reader.readLine());
+                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
+                ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
+                Deposited input= (Deposited) in.readObject();
+                System.out.println(input.password);
+
 
             }
         } catch (IOException ioException) {
             ioException.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }
