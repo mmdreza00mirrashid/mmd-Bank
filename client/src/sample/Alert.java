@@ -58,4 +58,20 @@ public class Alert {
         stage.showAndWait();
         return result;
     }
+    public static void message(String message){
+        Stage stage=new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setTitle("خطا");
+        stage.setMinWidth(300);
+        Label error=new Label(message);
+        Button close=new Button("تایید");
+        close.setOnAction(e -> stage.close());
+
+        VBox layout=new VBox(15);
+        layout.getChildren().addAll(error ,close);
+        layout.setAlignment(Pos.CENTER);
+        Scene scene=new Scene(layout);
+        stage.setScene(scene);
+        stage.showAndWait();
+    }
 }

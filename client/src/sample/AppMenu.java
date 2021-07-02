@@ -22,8 +22,8 @@ public class AppMenu {
     Stage window;
     public  AppMenu(Stage primaryStage){
         window=primaryStage;
-        user=new Client();
         login();
+        user=new Client();
     }
     public MenuBar topMenu(){
         Menu home=new Menu("خانه");
@@ -32,12 +32,14 @@ public class AppMenu {
         MenuItem addAccount=new MenuItem("افزودن حساب");
         addAccount.setOnAction(e ->AddAccount());
         MenuItem manageAccount=new MenuItem("مدیریت حساب ها");
+        MenuItem common=new MenuItem("افزودن حساب پرکاربرد");
+        common.setOnAction(e ->addCommonAccount());
         MenuItem logOut=new MenuItem("حروج از حساب");
         logOut.setOnAction(e-> {
             if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
                 login();
         });
-        accMenu.getItems().addAll(addAccount ,manageAccount , new SeparatorMenuItem() ,logOut);
+        accMenu.getItems().addAll(addAccount ,manageAccount , new SeparatorMenuItem() ,common ,new SeparatorMenuItem(),logOut);
         //String color="#37FF33";
         //accMenu.setStyle("-fx-background-color: " + color + ";");
 
@@ -63,7 +65,7 @@ public class AppMenu {
         layout.setTop(topMenu());
         VBox vBox=new VBox();
         Label lblBalance=new Label();
-        lblBalance.setText("موجودی:"+account.primaryBalance+"");
+        lblBalance.setText("موجودی:");//user.account.primary balance
         lblBalance.setFont(Font.font("Tahoma", FontWeight.LIGHT ,50));
         vBox.getChildren().add(lblBalance);
         vBox.setAlignment(Pos.TOP_CENTER);
@@ -118,7 +120,7 @@ public class AppMenu {
                         acc=new Deposited(passwordField.getText() ,AccType.SAVING ,alias.getText());
                     else
                         acc=new Deposited(passwordField.getText() ,AccType.CURRENT,alias.getText());
-                    acc.transferData();
+                    user.addDeposited(acc);
                     lblNum.setText("شماره حساب: "+acc.accountNumber);
                     lblNum.setVisible(true);
                     passwordField.setVisible(false);
@@ -157,7 +159,6 @@ public class AppMenu {
         grid.add(loginButton ,1 ,4);
         loginButton.setOnAction(e->{
             if(User.equals(txtPass.getText()) && Pass.equals(txtPass.getText())) {//if(user.login())
-                System.out.println("welcome");
                 show();
 
             }
@@ -265,7 +266,7 @@ public class AppMenu {
         grid.add(done ,3, 4);
         done.setOnAction(e->{
             if(!passwordField.getText().isEmpty() &&NumericCheck(textField.getText())){
-                //account.depositOperation(passwordField.getText() ,textField.getText());
+                user.deposit(passwordField.getText() ,textField.getText());
                 show();
             }
         });
@@ -295,7 +296,12 @@ public class AppMenu {
         grid.add(done ,3, 4);
         done.setOnAction(e->{
             if(!passwordField.getText().isEmpty() &&NumericCheck(textField.getText())){
-                //account.withdrawOperation(passwordField.getText() ,textField.getText());
+                if(user.withdraw(passwordField.getText() ,textField.getText())){
+                    Alert.message("برداشت با موفقیت انجام شد");
+                }
+                else
+                    Alert.message("موجودی شما کافی نمی باشد");
+
                 show();
             }
         });
@@ -413,6 +419,41 @@ public class AppMenu {
             //deposit(passwordField.getText ,""+sum);
         });
         grid.add(sum ,1 ,5);
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+    public void addCommonAccount(){
+        window.setTitle("اضافه حساب پرکاربرد");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblNum=new Label("شماره حساب را وارد کنید");
+        grid.add(lblNum ,1 ,0);
+        TextField num=new TextField();
+        grid.add(num ,1,1);
+        Label lblName=new Label("یک اسم مستعار برای حساب انتخاب کنید");
+        grid.add(lblName ,1,2);
+        TextField name=new TextField();
+        grid.add(name ,1,3);
+        Button done=new Button("اتمام");
+        grid.add(done ,3,4);
+        done.setOnAction(e ->{
+            if(!name.getText().isEmpty() && !num.getText().isEmpty()){
+                if(NumericCheck(num.getText()) && num.getText().length()>10){// it could be =16
+                    user.addCommonAccount(new Deposited(num.getText() ,name.getText()));
+                    Alert.message("حساب با موفقیت به لیست شما اضافه شد");
+                    show();
+                }
+                else
+                    Alert.message("شماره حساب معتبر نمی باشد");
+
+            }
+        });
         layout.setCenter(grid);
         window.setScene(new Scene(layout ,600 ,600));
         window.show();

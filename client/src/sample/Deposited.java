@@ -1,17 +1,13 @@
 package sample;
 
-
-import javafx.stage.Stage;
-
 import java.io.*;
-import java.net.Socket;
 
 public class Deposited implements Serializable{
     String accountNumber;
     AccType type;
     String password ,alias=null;
     long balance;
-    boolean commonlyUsed;
+    boolean commonlyUsed=false;
 
     public Deposited(String pass ,AccType accType ,String alias){
         password=pass;
@@ -21,25 +17,11 @@ public class Deposited implements Serializable{
         this.alias=alias;
     }
 
-    public void transferData(){
-        Socket mSocket;
-        int port=0505;
-        String serverAddress = "localhost";//for example
-        OutputStream toServerStream;
-        PrintWriter writer;
-        try {
-            mSocket=new Socket(serverAddress, port);
-            toServerStream = mSocket.getOutputStream();
-            writer = new PrintWriter(toServerStream, true);
-            writer.println("Add Deposited Account");
-            ObjectOutputStream out= new ObjectOutputStream(new BufferedOutputStream(mSocket.getOutputStream()));
-            out.writeObject(this);
-            out.flush();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public Deposited(String accountNumber, String alias) {
+        this.accountNumber = accountNumber;
+        this.alias = alias;
     }
+
     public String numGenerator(){
         String num="";
         for(int i=0;i<16;i++){

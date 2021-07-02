@@ -54,12 +54,22 @@ class ClientManagement implements Runnable{
             out= new ObjectOutputStream(toClientStream);
             String inputTest="Sign In";
             while (true){
-                if(reader.readLine().equals(inputTest)){
+                String str=reader.readLine();
+                if(str.equals(inputTest)){
                     Account input=(Account) in.readObject();
                     System.out.println(input.name);
                     System.out.println(input.phone);
 
 
+                }
+                else if(str.equals("Add Deposited")) {
+                    Deposited input= (Deposited) in.readObject();
+                    System.out.println(input.password);
+                }
+                else if(str.equals("Add CommonlyUsed Account")){
+                    Deposited input= (Deposited) in.readObject();
+                    System.out.println(input.accountNumber);
+                    System.out.println(input.alias);
                 }
             }
 
