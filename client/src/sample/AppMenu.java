@@ -17,22 +17,17 @@ import java.net.Socket;
 import java.util.regex.Pattern;
 
 public class AppMenu {
-    Socket mSocket;
-    Account account=new Account();
-    int port=0505;
-    String serverAddress = "185.51.200.2";//for example
+    Account account;
+    Client user;
     Stage window;
-    InputStream fromServerStream;
-    OutputStream toServerStream;
-    DataInputStream reader;
-    PrintWriter writer;
     public  AppMenu(Stage primaryStage){
         window=primaryStage;
+        user=new Client();
         login();
     }
     public MenuBar topMenu(){
         Menu home=new Menu("خانه");
-        home.setOnAction(e ->show());
+        home.setOnAction(e -> show());
         Menu accMenu=new Menu("حساب");
         MenuItem addAccount=new MenuItem("افزودن حساب");
         addAccount.setOnAction(e ->AddAccount());
@@ -43,15 +38,21 @@ public class AppMenu {
                 login();
         });
         accMenu.getItems().addAll(addAccount ,manageAccount , new SeparatorMenuItem() ,logOut);
-        String color="#37FF33";
+        //String color="#37FF33";
         //accMenu.setStyle("-fx-background-color: " + color + ";");
 
         Menu activities=new Menu("عملیات های بانکی");
         MenuItem deposit=new MenuItem("واریز");
         deposit.setOnAction(e ->deposit());
         MenuItem withdraw=new MenuItem("برداشت");
+        withdraw.setOnAction(e ->withdraw());
         MenuItem transfer=new MenuItem("کارت به کارت");
-        activities.getItems().addAll(deposit ,withdraw ,transfer);
+        transfer.setOnAction(e ->MoneyTransfer());
+        MenuItem bill=new MenuItem("پرداخت قبض");
+        bill.setOnAction(e ->payBill());
+        MenuItem loan=new MenuItem("درخواست وام");
+        loan.setOnAction(e ->loanRequest());
+        activities.getItems().addAll(deposit ,withdraw ,transfer ,bill ,new SeparatorMenuItem() ,loan);
         MenuBar menuBar=new MenuBar();
         menuBar.getMenus().addAll(home ,accMenu ,activities);
         return menuBar;
@@ -118,7 +119,6 @@ public class AppMenu {
                     else
                         acc=new Deposited(passwordField.getText() ,AccType.CURRENT,alias.getText());
                     acc.transferData();
-                    account.addDeposited(acc);
                     lblNum.setText("شماره حساب: "+acc.accountNumber);
                     lblNum.setVisible(true);
                     passwordField.setVisible(false);
@@ -130,8 +130,8 @@ public class AppMenu {
 
     }
     public void login(){
-        String User="Admin";
-        String Pass="Admin";
+        String User="";
+        String Pass="";
         GridPane grid=new GridPane();
         grid.setAlignment(Pos.CENTER);
         grid.setHgap(10);
@@ -156,7 +156,7 @@ public class AppMenu {
         Button loginButton=new Button("ورود");
         grid.add(loginButton ,1 ,4);
         loginButton.setOnAction(e->{
-            if(User.equals(txtPass.getText()) && Pass.equals(txtPass.getText())) {
+            if(User.equals(txtPass.getText()) && Pass.equals(txtPass.getText())) {//if(user.login())
                 System.out.println("welcome");
                 show();
 
@@ -221,18 +221,13 @@ public class AppMenu {
 
         }
         Sign.setOnAction(e->{
-            account=new Account();
-            account.name=txtName.getText();
-            account.user=txtUser.getText();
-            account.pass=txtPass.getText();
-            account.phone=txtPhone.getText();
-            account.mail=txtMail.getText();
+            account=new Account(txtName.getText() ,txtUser.getText() ,txtPass.getText() ,txtPhone.getText() ,txtMail.getText());
             if(!(txtName.getText().isEmpty() || txtUser.getText().isEmpty() || txtPass.getText().isEmpty()
                     || txtPhone.getText().isEmpty() || txtMail.getText().isEmpty())){
 
                 if(NumericCheck(txtUser.getText()) && emailCheck(txtMail.getText()) && NumericCheck(txtPhone.getText())
                         &&txtUser.getText().length()==10){ //because id has 10 numbers
-                    //account.transfer
+                    user.signIn(account);
                     login();
                 }
                 else
@@ -250,6 +245,7 @@ public class AppMenu {
     }
 
     public void deposit(){
+        window.setTitle("واریز وجه");
         BorderPane layout=new BorderPane();
         layout.setTop(topMenu());
         GridPane grid=new GridPane();
@@ -273,6 +269,150 @@ public class AppMenu {
                 show();
             }
         });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+
+    public void withdraw(){
+        window.setTitle("برداشت وجه");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblPass=new Label("رمز عبور حساب خود را وارد کنید");
+        grid.add(lblPass ,1 ,0);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1,1);
+        Label lblSum=new Label("مبلغ مورد نظر را وارد کنید");
+        grid.add(lblSum ,1,2);
+        TextField textField=new TextField();
+        grid.add(textField ,1,3);
+        Button done=new Button("برداشت");
+        grid.add(done ,3, 4);
+        done.setOnAction(e->{
+            if(!passwordField.getText().isEmpty() &&NumericCheck(textField.getText())){
+                //account.withdrawOperation(passwordField.getText() ,textField.getText());
+                show();
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+    public void MoneyTransfer(){
+        window.setTitle("انتقال وجه");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblPass=new Label("رمز عبور حساب خود را وارد کنید");
+        grid.add(lblPass ,1 ,0);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1,1);
+        Label lblDest=new Label("شماره حساب مقصد را وارد کنید");
+        grid.add(lblDest,1,2);
+        TextField destAccount=new TextField();
+        grid.add(destAccount ,1,3);
+        Label lblSum=new Label("مبلغ مورد نظر را وارد کنید");
+        grid.add(lblSum ,1,4);
+        TextField textField=new TextField();
+        grid.add(textField ,1,5);
+        Button done=new Button("انتقال وجه");
+        grid.add(done ,3, 6);
+        done.setOnAction(e->{
+            if(!passwordField.getText().isEmpty() &&NumericCheck(textField.getText())){
+                //account.transfer money(passwordField.getText() ,textField.getText());
+                show();
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+    public void loanRequest(){
+        window.setTitle("درخواست وام");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label installment=new Label("تعداد اقساط");
+        grid.add(installment ,3,0);
+        ChoiceBox<Integer> installmentBox=new ChoiceBox<>();
+        installmentBox.getItems().addAll(6 ,12 ,18 ,24 ,36 ,72);
+        installmentBox.setValue(6);
+        grid.add(installmentBox ,1 ,0);
+        Label interest=new Label(" بهره: "+(10+installmentBox.getValue()/3)+"%");
+        installmentBox.setOnAction(e -> interest.setText("بهره:"+(10+installmentBox.getValue()/3)+"%"));
+        grid.add(interest ,3,1);
+        Label sum=new Label("مقدار به میلیون تومان: ");
+        grid.add(sum ,3,3);
+        ChoiceBox<Integer> sumBox=new ChoiceBox<>();
+        sumBox.getItems().addAll(5 ,10 ,20 ,50 ,100);
+        sumBox.setValue(5);
+        grid.add(sumBox ,2 ,3);
+        Button request=new Button("درخواست");
+        grid.add(request ,0 ,5);
+        request.setOnAction(e ->{
+            //request a loan
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+
+
+    }
+    public void payBill(){
+        window.setTitle("پرداخت قبض");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblID=new Label("شناسه قیض خود را وارد کنید");
+        grid.add(lblID ,1 ,0);
+        TextField Id=new TextField();
+        grid.add(Id ,1,1);
+        Label lblIdPay=new Label("شناسه پرداخت را وارد کنید");
+        grid.add(lblIdPay ,1,2);
+        TextField IdPay=new TextField();
+        grid.add(IdPay ,1,3);
+        Button check=new Button("بررسی قبض");
+        grid.add(check ,4, 4);
+        int amount= 1000*((int) (((Math.random()*100)+1)));
+        Label sum=new Label("مبلغ قبض: "+amount+" تومان ");
+        Label lblPass=new Label("رمز حساب خود را وارد کنید");
+        grid.add(lblPass ,1 ,6);
+        lblPass.setVisible(false);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1 ,7);
+        passwordField.setVisible(false);
+        Button done =new Button("پرداخت");
+        grid.add(done ,4 ,8);
+        done.setVisible(false);
+        sum.setVisible(false);
+        check.setOnAction(e ->{
+            check.setVisible(false);
+            sum.setVisible(true);
+            lblPass.setVisible(true);
+            passwordField.setVisible(true);
+            done.setVisible(true);
+        });
+        done.setOnAction(e ->{
+            //deposit(passwordField.getText ,""+sum);
+        });
+        grid.add(sum ,1 ,5);
         layout.setCenter(grid);
         window.setScene(new Scene(layout ,600 ,600));
         window.show();

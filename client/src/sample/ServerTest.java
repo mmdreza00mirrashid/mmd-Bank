@@ -38,6 +38,8 @@ class ClientManagement implements Runnable{
     OutputStream toClientStream;
     DataInputStream reader;
     PrintWriter writer;
+    ObjectInputStream in;
+    ObjectOutputStream out;
     public ClientManagement(ServerTest server, Socket client){
         this.server=server;
         this.client=client;}
@@ -48,16 +50,19 @@ class ClientManagement implements Runnable{
             fromClientStream = client.getInputStream();
             writer = new PrintWriter(toClientStream, true);
             reader = new DataInputStream(fromClientStream);
+            in = new ObjectInputStream(fromClientStream);
+            out= new ObjectOutputStream(toClientStream);
+            String inputTest="Sign In";
+            while (true){
+                if(reader.readLine().equals(inputTest)){
+                    Account input=(Account) in.readObject();
+                    System.out.println(input.name);
+                    System.out.println(input.phone);
 
-            String inputTest="Add Deposited Account";
-            if(reader.readLine().equals(inputTest)){
-                ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
-                ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
-                Deposited input= (Deposited) in.readObject();
-                System.out.println(input.password);
 
-
+                }
             }
+
         } catch (IOException ioException) {
             ioException.printStackTrace();
         } catch (ClassNotFoundException e) {

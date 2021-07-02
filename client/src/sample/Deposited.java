@@ -11,6 +11,7 @@ public class Deposited implements Serializable{
     AccType type;
     String password ,alias=null;
     long balance;
+    boolean commonlyUsed;
 
     public Deposited(String pass ,AccType accType ,String alias){
         password=pass;
