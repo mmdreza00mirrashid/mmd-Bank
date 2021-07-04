@@ -14,6 +14,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import sample.network.Network;
 
 import java.util.regex.Pattern;
 
@@ -26,7 +27,8 @@ public class Main extends Application {
 
 
     @Override
-    public void start(Stage PrimaryStage) throws Exception {
+    public void start(Stage PrimaryStage) {
+
         PrimaryStage.setTitle("MMD Bank");
         AppMenu appMenu=new AppMenu(PrimaryStage);
 

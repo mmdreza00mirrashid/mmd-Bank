@@ -3,8 +3,6 @@ package sample;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collections;
 
 public class ServerTest {
     ServerSocket mServer;
@@ -53,7 +51,7 @@ class ClientManagement implements Runnable{
             if(reader.readLine().equals(inputTest)){
                 ObjectOutputStream out = new ObjectOutputStream(new BufferedOutputStream(client.getOutputStream()));
                 ObjectInputStream in = new ObjectInputStream(new BufferedInputStream(client.getInputStream()));
-                Deposited input= (Deposited) in.readObject();
+                Account input= (Account) in.readObject();
                 System.out.println(input.password);
 
 
