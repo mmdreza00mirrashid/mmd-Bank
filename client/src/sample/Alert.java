@@ -61,7 +61,7 @@ public class Alert {
     public static void message(String message){
         Stage stage=new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("خطا");
+        stage.setTitle("اعلان");
         stage.setMinWidth(300);
         Label error=new Label(message);
         Button close=new Button("تایید");

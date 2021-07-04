@@ -1,9 +1,12 @@
 package sample;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -16,6 +19,8 @@ import sample.network.Network;
 import java.awt.datatransfer.Transferable;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 public class AppMenu {
@@ -50,6 +55,7 @@ public class AppMenu {
         MenuItem withdraw = new MenuItem("برداشت");
         withdraw.setOnAction(e->withdraw());
         MenuItem transfer = new MenuItem("کارت به کارت");
+        transfer.setOnAction(e->MoneyTransfer());
         MenuItem bill=new MenuItem("پرداخت قبض");
         bill.setOnAction(e ->payBill());
         MenuItem loan=new MenuItem("درخواست وام");
@@ -69,8 +75,9 @@ public class AppMenu {
         lblBalance.setFont(Font.font("Tahoma", FontWeight.LIGHT, 50));
         vBox.getChildren().add(lblBalance);
         vBox.setAlignment(Pos.TOP_CENTER);
-        layout.setCenter(vBox);
-        Scene scene = new Scene(layout, 600, 600);
+        layout.setBottom(vBox);
+        layout.setCenter(history());
+        Scene scene = new Scene(layout,  650, 600);
         window.setScene(scene);
         window.show();
 
@@ -123,10 +130,15 @@ public class AppMenu {
             if (saving.isSelected() || primary.isSelected()) {
                 if (!passwordField.getText().isEmpty()) {
                     Account acc;
-                    if (saving.isSelected())
-                        acc = new Account(passwordField.getText(), AccType.SAVING, alias.getText(),amount.getText());
+                    String strAllis;
+                    if(alias.getText().isEmpty())
+                        strAllis="ندارد";
                     else
-                        acc = new Account(passwordField.getText(), AccType.CURRENT, alias.getText(),amount.getText());
+                        strAllis=alias.getText();
+                    if (saving.isSelected())
+                        acc = new Account(passwordField.getText(), AccType.SAVING, strAllis,amount.getText());
+                    else
+                        acc = new Account(passwordField.getText(), AccType.CURRENT, strAllis,amount.getText());
                     txtNum.setText("شماره حساب: " + acc.accountNumber);
                     txtNum.setVisible(true);
                     passwordField.setVisible(false);
@@ -173,6 +185,7 @@ public class AppMenu {
                 ioException.printStackTrace();
             }
             if (result.equals("true")) {
+                account.user=txtUser.getText();
                 show();
             }
             else
@@ -391,6 +404,92 @@ public class AppMenu {
         layout.setCenter(grid);
         window.setScene(new Scene(layout ,600 ,600));
         window.show();
+    }
+
+    public void MoneyTransfer(){
+        window.setTitle("انتقال وجه");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblAccountNum = new Label("شماره حساب خود را وارد کنید");
+        grid.add(lblAccountNum, 1, 0);
+        TextField accountNum = new TextField();
+        grid.add(accountNum, 1, 1);
+        Label lblPass=new Label("رمز عبور حساب خود را وارد کنید");
+        grid.add(lblPass ,1 ,2);
+        PasswordField passwordField=new PasswordField();
+        grid.add(passwordField ,1,3);
+        Label lblDest=new Label("شماره حساب مقصد را وارد کنید");
+        grid.add(lblDest,1,4);
+        TextField destAccount=new TextField();
+        grid.add(destAccount ,1,5);
+        Label lblSum=new Label("مبلغ مورد نظر را وارد کنید");
+        grid.add(lblSum ,1,6);
+        TextField textField=new TextField();
+        grid.add(textField ,1,7);
+        Button done=new Button("انتقال وجه");
+        grid.add(done ,3, 8);
+        done.setOnAction(e->{
+            if(!passwordField.getText().isEmpty() && !destAccount.getText().isEmpty() &&
+                    NumericCheck(textField.getText()) && NumericCheck(destAccount.getText())){
+                TransferMoney t=new TransferMoney("test" ,accountNum.getText() ,destAccount.getText() ,
+                        textField.getText() ,passwordField.getText());
+                t.send();
+                show();
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+
+    public VBox history(){
+        VBox layout=new VBox();
+        TableView<Transaction> table=new TableView<>();
+        TableColumn<Transaction ,String> numColumn=new TableColumn<>("شماره حساب");
+        numColumn.setMinWidth(200);
+        numColumn.setCellValueFactory(new PropertyValueFactory<>("accountNumber"));
+        TableColumn<Transaction ,String> commentColumn=new TableColumn<>("توضیحات");
+        commentColumn.setMinWidth(100);
+        commentColumn.setCellValueFactory(new PropertyValueFactory<>("comment"));
+        TableColumn<Transaction ,String> sumColumn=new TableColumn<>("مبلغ");
+        sumColumn.setMinWidth(100);
+        sumColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        TableColumn<Transaction , Date> dateColumn=new TableColumn<>("تاریخ");
+        dateColumn.setMinWidth(100);
+        dateColumn.setCellValueFactory(new PropertyValueFactory<>("date"));
+        TableColumn<Transaction ,String> typeColumn=new TableColumn<>("نوع تراکنش");
+        typeColumn.setMinWidth(150);
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        ChoiceBox<String> choiceBox=new ChoiceBox<>();
+        ArrayList<String> accounts=account.getAccounts();
+        for (String str:accounts){
+            choiceBox.getItems().add(str);
+        }
+        choiceBox.setValue(accounts.get(0));
+        choiceBox.setMinWidth(200);
+        table.setItems(getTransaction(choiceBox.getValue()));
+        table.getColumns().addAll(numColumn ,commentColumn ,sumColumn ,dateColumn ,typeColumn);
+        Button update=new Button("بروزرسانی");
+        update.setOnAction(e->{
+            table.setItems(getTransaction(choiceBox.getValue()));
+        });
+        layout.getChildren().addAll(choiceBox ,table ,update);
+        layout.setAlignment(Pos.TOP_CENTER);
+        return layout;
+    }
+
+    public ObservableList<Transaction> getTransaction(String accountNumber){
+        ObservableList<Transaction> transactions= FXCollections.observableArrayList();
+        ArrayList<Transaction> history=Transaction.receive(accountNumber);
+        for(Transaction t:history){
+            transactions.add(t);
+        }
+        return transactions;
     }
 
     public boolean NumericCheck(String strNum) {
