@@ -25,5 +25,6 @@ public class TransferMoney implements Transferable {
         this.destAccount = destAccount;
         this.amount = amount;
         this.password = password;
+        this.send();
     }
 }

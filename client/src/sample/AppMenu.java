@@ -40,11 +40,12 @@ public class AppMenu {
         Menu accMenu = new Menu("حساب");
         MenuItem addAccount = new MenuItem("افزودن حساب");
         addAccount.setOnAction(e -> AddAccount());
-        MenuItem manageAccount = new MenuItem("مدیریت حساب ها");
+        MenuItem manageAccount = new MenuItem("مشاهده حساب ها");
         manageAccount.setOnAction(e->accountManagement());
         MenuItem remove=new MenuItem("حذف حساب");
         remove.setOnAction(e ->removeAccount());
         MenuItem common=new MenuItem("افزودن حساب پرکاربرد");
+        common.setOnAction(e->addCommonAccount());
         MenuItem logOut=new MenuItem("حروج از حساب");
         logOut.setOnAction(e-> {
             if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
@@ -189,6 +190,48 @@ public class AppMenu {
         window.setScene(new Scene(layout, 600, 600));
         window.show();
 
+    }
+    public void addCommonAccount(){
+        window.setTitle("اضافه حساب پرکاربرد");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblNum=new Label("شماره حساب را وارد کنید");
+        grid.add(lblNum ,1 ,0);
+        TextField num=new TextField();
+        grid.add(num ,1,1);
+        Label lblName=new Label("یک اسم مستعار برای حساب انتخاب کنید");
+        grid.add(lblName ,1,2);
+        TextField name=new TextField();
+        grid.add(name ,1,3);
+        Button done=new Button("اتمام");
+        grid.add(done ,3,4);
+        done.setOnAction(e ->{
+            if(!name.getText().isEmpty() && !num.getText().isEmpty()){
+                if(NumericCheck(num.getText()) && num.getText().length()>10){// it could be =16
+                    account.addCommon(num.getText() ,name.getText());
+                    show();
+                }
+
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+    }
+    public ChoiceBox<String> commonList(){
+        ChoiceBox<String> choiceBox=new ChoiceBox<>();
+        ArrayList<String> name=account.getCommonList();
+        for(String str:name){
+            choiceBox.getItems().add(str);
+        }
+        choiceBox.setValue(name.get(0));
+        choiceBox.setMinWidth(100);
+        return choiceBox;
     }
     public void accountManagement(){
         BorderPane layout=new BorderPane();
@@ -496,15 +539,22 @@ public class AppMenu {
         grid.add(lblSum ,1,6);
         TextField textField=new TextField();
         grid.add(textField ,1,7);
+        ChoiceBox<String> common=commonList();
+        common.setOnAction(e->{
+            destAccount.setText(account.commonNum(common.getValue()));
+        });
+        grid.add(common ,3,5);
         Button done=new Button("انتقال وجه");
-        grid.add(done ,3, 8);
+        grid.add(done ,0, 9);
         done.setOnAction(e->{
-            if(!passwordField.getText().isEmpty() && !destAccount.getText().isEmpty() &&
-                    NumericCheck(textField.getText()) && NumericCheck(destAccount.getText())){
-                TransferMoney t=new TransferMoney("test" ,accountNum.getText() ,destAccount.getText() ,
-                        textField.getText() ,passwordField.getText());
-                t.send();
-                show();
+            if(!passwordField.getText().isEmpty() && NumericCheck(textField.getText())){
+                TransferMoney t;
+                if(!destAccount.getText().isEmpty() && NumericCheck(destAccount.getText())){
+                    t=new TransferMoney("test" ,accountNum.getText() ,destAccount.getText() ,
+                            textField.getText() ,passwordField.getText());
+                    show();
+                }
+
             }
         });
         layout.setCenter(grid);
