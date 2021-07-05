@@ -1,5 +1,7 @@
 package sample.network;
 
+import sample.Alert;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -12,7 +14,6 @@ public class Network implements Runnable{
             if(server==null)
                 server = new Socket("localhost",8585);
         } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -22,9 +23,14 @@ public class Network implements Runnable{
             t.start();
             t.join();
         }
-        DataOutputStream out = new DataOutputStream(server.getOutputStream());
-        out.writeUTF(data);
-        out.flush();
+        try {
+            DataOutputStream out = new DataOutputStream(server.getOutputStream());
+            out.writeUTF(data);
+            out.flush();
+        }catch (Exception e) {
+            Alert.message("در ارتباط با سرور مشکلی پیش امده است");
+        }
+
     }
 
     public static String receive() throws IOException, InterruptedException {

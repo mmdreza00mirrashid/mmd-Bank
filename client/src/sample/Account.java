@@ -45,6 +45,7 @@ public class Account implements Transferable {
         try {
             Network.send("createAccount|"+accountNumber+"|"+type+"|"+alias+"|"+password+"|"+amount);
         } catch (IOException | InterruptedException e) {
+            Alert.message("در ارتباط با سرور مشکلی پیش امده است");
             e.printStackTrace();
         }
     }

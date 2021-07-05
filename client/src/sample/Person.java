@@ -65,9 +65,17 @@ public class Person implements Transferable {
             Network.send("get common accountNumber|"+alias);
             output=Network.receive();
         } catch (IOException | InterruptedException ioException) {
+            Alert.message("در ارتباط با سرور مشکلی پیش امده است");
             ioException.printStackTrace();
         }finally {
             return output;
+        }
+    }
+    public static void loan(String accountNum ,String amount ,String installment ,String interest){
+        try {
+            Network.send("loan|" + accountNum + "|" + amount + "|" + installment + "|" + interest);
+        } catch (IOException | InterruptedException ioException) {
+            ioException.printStackTrace();
         }
     }
 }

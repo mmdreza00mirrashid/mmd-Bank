@@ -38,6 +38,7 @@ public class Transaction implements Transferable {
             Network.send("transaction|"+accountNumber+"|"+type+"|"+amount+"|"+password+"|"+comment);
             Alert.message(Network.receive());
         } catch (IOException | InterruptedException e) {
+            Alert.message("در ارتباط با سرور مشکلی پیش امده است");
             e.printStackTrace();
         }
     }

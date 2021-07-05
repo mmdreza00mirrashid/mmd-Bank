@@ -35,8 +35,15 @@ public class AppMenu {
     }
 
     public MenuBar topMenu() {
-        Menu home = new Menu("خانه");
-        home.setOnAction(e -> show());
+        Menu user = new Menu("کاربر");
+        MenuItem home=new MenuItem("صفحه اصلی");
+        home.setOnAction(e->show());
+        MenuItem logOut=new MenuItem("حروج از حساب");
+        logOut.setOnAction(e-> {
+            if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
+                login();
+        });
+        user.getItems().addAll(home ,logOut);
         Menu accMenu = new Menu("حساب");
         MenuItem addAccount = new MenuItem("افزودن حساب");
         addAccount.setOnAction(e -> AddAccount());
@@ -46,12 +53,9 @@ public class AppMenu {
         remove.setOnAction(e ->removeAccount());
         MenuItem common=new MenuItem("افزودن حساب پرکاربرد");
         common.setOnAction(e->addCommonAccount());
-        MenuItem logOut=new MenuItem("حروج از حساب");
-        logOut.setOnAction(e-> {
-            if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
-                login();
-        });
-        accMenu.getItems().addAll(addAccount ,manageAccount ,remove, new SeparatorMenuItem() ,common ,new SeparatorMenuItem(),logOut);
+
+
+        accMenu.getItems().addAll(addAccount ,manageAccount ,remove, new SeparatorMenuItem() ,common);
         String color = "#37FF33";
         //accMenu.setStyle("-fx-background-color: " + color + ";");
 
@@ -65,9 +69,10 @@ public class AppMenu {
         MenuItem bill=new MenuItem("پرداخت قبض");
         bill.setOnAction(e ->payBill());
         MenuItem loan=new MenuItem("درخواست وام");
+        loan.setOnAction(e->loanRequest());
         activities.getItems().addAll(deposit ,withdraw ,transfer ,bill ,new SeparatorMenuItem() ,loan);
         MenuBar menuBar = new MenuBar();
-        menuBar.getMenus().addAll(home, accMenu, activities);
+        menuBar.getMenus().addAll(user, accMenu, activities);
         return menuBar;
     }
 
@@ -269,19 +274,16 @@ public class AppMenu {
         Text welcome = new Text("برای ادامه وارد حساب کاربری خود شوید");
         welcome.setFont(Font.font("Tahoma", FontWeight.LIGHT, 20));
         grid.add(welcome, 1, 0);
-
         Label lblUser = new Label("نام کاربری");
         grid.add(lblUser, 0, 2);
         TextField txtUser = new TextField();
         txtUser.setPromptText("username");
         grid.add(txtUser, 1, 2);
-
         Label lblPass = new Label("رمز عبور");
         grid.add(lblPass, 0, 3);
         PasswordField txtPass = new PasswordField();
         txtPass.setPromptText("password");
         grid.add(txtPass, 1, 3);
-
         Button loginButton = new Button("ورود");
         grid.add(loginButton, 1, 4);
         loginButton.setOnAction(e -> {
@@ -613,12 +615,69 @@ public class AppMenu {
         }
         return transactions;
     }
+
     public ObservableList<Account> getList(){
         ObservableList<Account> accounts=FXCollections.observableArrayList();
         ArrayList<Account> list=Account.getList();
         for(Account a:list)
             accounts.add(a);
         return accounts;
+    }
+
+    public void loanRequest(){
+        window.setTitle("درخواست وام");
+        BorderPane layout=new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid=new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label acc=new Label("حساب: ");
+        grid.add(acc ,3 ,0);
+        ChoiceBox<String> choiceBox=new ChoiceBox<>();
+        ArrayList<String> accounts=account.getAccounts();
+        if(accounts.size()==0){
+            choiceBox.getItems().add("حسابی یافت نشد");
+            choiceBox.setValue("حسابی یافت نشد");
+        }
+        else {
+            for (String str:accounts){
+                choiceBox.getItems().add(str);
+            }
+            choiceBox.setValue(accounts.get(0));
+        }
+        choiceBox.setMinWidth(200);
+        grid.add(choiceBox,0,0);
+        Label installment=new Label("تعداد اقساط");
+        grid.add(installment ,3,1);
+        ChoiceBox<Integer> installmentBox=new ChoiceBox<>();
+        installmentBox.getItems().addAll(6 ,12 ,18 ,24 ,36 ,72);
+        installmentBox.setValue(6);
+        grid.add(installmentBox ,2 ,2);
+        Label interest=new Label(" بهره: "+(10+installmentBox.getValue()/3)+"%");
+        installmentBox.setOnAction(e -> interest.setText("بهره:"+(10+installmentBox.getValue()/3)+"%"));
+        grid.add(interest ,3,2);
+        Label sum=new Label("مقدار به میلیون تومان: ");
+        grid.add(sum ,3,4);
+        ChoiceBox<Integer> sumBox=new ChoiceBox<>();
+        sumBox.getItems().addAll(5 ,10 ,20 ,50 ,100);
+        sumBox.setValue(5);
+        grid.add(sumBox ,2 ,4);
+        Button request=new Button("درخواست");
+        grid.add(request ,0 ,5);
+        request.setOnAction(e ->{
+            if(NumericCheck(choiceBox.getValue())){
+                Person.loan(choiceBox.getValue() ,String.valueOf(sumBox.getValue()) ,String.valueOf(installmentBox.getValue())
+                        ,String.valueOf(10+installmentBox.getValue()/3));
+            }
+
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout ,600 ,600));
+        window.show();
+
+
     }
 
     public boolean NumericCheck(String strNum) {
