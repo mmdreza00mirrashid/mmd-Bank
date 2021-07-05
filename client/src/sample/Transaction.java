@@ -25,7 +25,6 @@ public class Transaction implements Transferable {
     }
 
     public Transaction(TransactionType type ,String comment, String accountNumber, String date, String amount) {
-        System.out.println("wrong");
         this.comment = comment;
         this.accountNumber = accountNumber;
         this.date = date;
@@ -64,9 +63,6 @@ public class Transaction implements Transferable {
                         transactions.add(new Transaction(TransactionType.TRANSFER ,splitData[4] ,splitData[1] ,
                                 splitData[5] ,splitData[3]));
                     }
-                }
-                for(Transaction t:transactions){
-                    System.out.println(t.date);
                 }
             }
 

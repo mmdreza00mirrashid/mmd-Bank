@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -29,6 +30,7 @@ public class AppMenu {
 
     public AppMenu(Stage primaryStage) {
         window = primaryStage;
+        window.getIcons().add(new Image("file:icon.png"));
         login();
     }
 
@@ -39,13 +41,16 @@ public class AppMenu {
         MenuItem addAccount = new MenuItem("افزودن حساب");
         addAccount.setOnAction(e -> AddAccount());
         MenuItem manageAccount = new MenuItem("مدیریت حساب ها");
+        manageAccount.setOnAction(e->accountManagement());
+        MenuItem remove=new MenuItem("حذف حساب");
+        remove.setOnAction(e ->removeAccount());
         MenuItem common=new MenuItem("افزودن حساب پرکاربرد");
         MenuItem logOut=new MenuItem("حروج از حساب");
         logOut.setOnAction(e-> {
             if(Alert.confirmation("از خروج از حساب خود اطمینان دارید؟"))
                 login();
         });
-        accMenu.getItems().addAll(addAccount ,manageAccount , new SeparatorMenuItem() ,common ,new SeparatorMenuItem(),logOut);
+        accMenu.getItems().addAll(addAccount ,manageAccount ,remove, new SeparatorMenuItem() ,common ,new SeparatorMenuItem(),logOut);
         String color = "#37FF33";
         //accMenu.setStyle("-fx-background-color: " + color + ";");
 
@@ -152,6 +157,66 @@ public class AppMenu {
 
     }
 
+    public void removeAccount(){
+        BorderPane layout = new BorderPane();
+        layout.setTop(topMenu());
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.CENTER);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 10, 5, 10));
+        Label lblAccountNum = new Label("شماره حساب خود را وارد کنید");
+        grid.add(lblAccountNum, 1, 0);
+        TextField accountNum = new TextField();
+        grid.add(accountNum, 1, 1);
+        Label lblPass = new Label("رمز عبور حساب خود را وارد کنید");
+        grid.add(lblPass, 1, 2);
+        PasswordField passwordField = new PasswordField();
+        grid.add(passwordField, 1, 3);
+        Label lblDest=new Label("یک حساب برای انتقال موجودی باقی مانده حساب فعلی انتخاب کنید");
+        grid.add(lblDest ,1,4);
+        TextField dest=new TextField();
+        grid.add(dest ,1,5);
+        Button done=new Button("حذف");
+        grid.add(done ,3, 6);
+        done.setOnAction(e->{
+            if(!passwordField.getText().isEmpty() && NumericCheck(accountNum.getText())){
+                Account.remove(accountNum.getText() ,passwordField.getText() ,dest.getText());
+                show();
+            }
+        });
+        layout.setCenter(grid);
+        window.setScene(new Scene(layout, 600, 600));
+        window.show();
+
+    }
+    public void accountManagement(){
+        BorderPane layout=new BorderPane();
+        VBox vBox=new VBox();
+        TableView<Account> table=new TableView<>();
+        TableColumn<Account ,String> numColumn=new TableColumn<>("شماره حساب");
+        numColumn.setMinWidth(200);
+        numColumn.setCellValueFactory(new PropertyValueFactory<>("accountNumber"));
+        TableColumn<Account ,String> sumColumn=new TableColumn<>("موجودی");
+        sumColumn.setMinWidth(100);
+        sumColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
+        TableColumn<Account ,String> typeColumn=new TableColumn<>("نوع حساب");
+        typeColumn.setMinWidth(150);
+        typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
+        TableColumn<Account ,String> aliasColumn=new TableColumn<>("اسم مستعار");
+        aliasColumn.setCellValueFactory(new PropertyValueFactory<>("alias"));
+        table.setItems(getList());
+        table.getColumns().addAll(numColumn ,sumColumn ,aliasColumn ,typeColumn);
+        Button back=new Button("بازگشت");
+        back.setOnAction(e->show());
+        vBox.getChildren().addAll(table ,back);
+        vBox.setAlignment(Pos.TOP_CENTER);
+        layout.setTop(topMenu());
+        layout.setCenter(vBox);
+        window.setScene(new Scene(layout,  650, 600));
+
+
+    }
     public void login() {
         GridPane grid = new GridPane();
         grid.setAlignment(Pos.CENTER);
@@ -467,10 +532,17 @@ public class AppMenu {
         typeColumn.setCellValueFactory(new PropertyValueFactory<>("type"));
         ChoiceBox<String> choiceBox=new ChoiceBox<>();
         ArrayList<String> accounts=account.getAccounts();
-        for (String str:accounts){
-            choiceBox.getItems().add(str);
+        if(accounts.size()==0){
+            choiceBox.getItems().add("حسابی یافت نشد");
+            choiceBox.setValue("حسابی یافت نشد");
         }
-        choiceBox.setValue(accounts.get(0));
+        else {
+            for (String str:accounts){
+                choiceBox.getItems().add(str);
+            }
+            choiceBox.setValue(accounts.get(0));
+        }
+
         choiceBox.setMinWidth(200);
         table.setItems(getTransaction(choiceBox.getValue()));
         table.getColumns().addAll(numColumn ,commentColumn ,sumColumn ,dateColumn ,typeColumn);
@@ -490,6 +562,13 @@ public class AppMenu {
             transactions.add(t);
         }
         return transactions;
+    }
+    public ObservableList<Account> getList(){
+        ObservableList<Account> accounts=FXCollections.observableArrayList();
+        ArrayList<Account> list=Account.getList();
+        for(Account a:list)
+            accounts.add(a);
+        return accounts;
     }
 
     public boolean NumericCheck(String strNum) {
