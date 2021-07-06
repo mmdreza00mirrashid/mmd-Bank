@@ -1,1 +1,10 @@
-createdAt=2021-07-03 16:49:43, password=test, amount=13000, alias=kiri, accountNumber=6457523637188052, type=SAVING, userId=test, updatedAt=2021-07-03 16:49:43
+createdAt=2021-07-05 05:27:36, password=1, amount=-27, alias=ندارد, accountNumber=3394718793894157, type=SAVING, userId=none, updatedAt=2021-07-05 05:27:36
+createdAt=2021-07-05 05:27:49, password=1, amount=0, alias=ندارد, accountNumber=2085246360592726, type=CURRENT, userId=none, updatedAt=2021-07-05 05:27:49
+createdAt=2021-07-05 05:28:22, password=1, amount=0, alias=ندارد, accountNumber=2243085871245103, type=CURRENT, userId=none, updatedAt=2021-07-05 05:28:22
+createdAt=2021-07-05 05:41:01, password=1, amount=0, alias=ندارد, accountNumber=7999372270294260, type=CURRENT, userId=none, updatedAt=2021-07-05 05:41:01
+createdAt=2021-07-05 05:45:17, password=1, amount=-27, alias=ندارد, accountNumber=6539054205124475, type=SAVING, userId=none, updatedAt=2021-07-05 05:45:17
+createdAt=2021-07-05 05:47:05, password=1, amount=8506976, alias=ندارد, accountNumber=1381433926588579, type=SAVING, userId=3611615900, updatedAt=2021-07-05 05:47:05
+createdAt=2021-07-05 05:49:53, password=1, amount=-123, alias=ندارد, accountNumber=5459212597921750, type=SAVING, userId=none, updatedAt=2021-07-05 05:49:53
+createdAt=2021-07-05 05:51:32, password=1, amount=-85, alias=ندارد, accountNumber=1263069192087706, type=SAVING, userId=none, updatedAt=2021-07-05 05:51:32
+createdAt=2021-07-05 05:54:18, password=1, amount=0, alias=ندارد, accountNumber=2028041487050612, type=SAVING, userId=none, updatedAt=2021-07-05 05:54:18
+createdAt=2021-07-05 10:00:50, password=1, amount=10000700, alias=ندارد, accountNumber=3372649486722452, type=CURRENT, userId=3611615900, updatedAt=2021-07-05 10:00:50

@@ -95,6 +95,7 @@ public abstract class Model<T> extends HashMap<String, String> {
         assert data != null;
         data.removeIf(item -> !((Model) item).get(column).equals(value.toString()));
 
+
         return data;
     }
 
