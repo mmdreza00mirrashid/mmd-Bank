@@ -74,6 +74,7 @@ public class Person implements Transferable {
     public static void loan(String accountNum ,String amount ,String installment ,String interest){
         try {
             Network.send("loan|" + accountNum + "|" + amount + "|" + installment + "|" + interest);
+            Alert.message(Network.receive());
         } catch (IOException | InterruptedException ioException) {
             ioException.printStackTrace();
         }

@@ -409,7 +409,7 @@ public class AppMenu {
         grid.add(done, 3, 5);
         done.setOnAction(e -> {
             if (!passwordField.getText().isEmpty() && NumericCheck(textField.getText())) {
-                Deposit d= new Deposit(accountNum.getText(),passwordField.getText(),textField.getText(),"test");
+                Deposit d= new Deposit(accountNum.getText(),passwordField.getText(),textField.getText(),"برداشت");
                 d.send();
                 show();
             }
@@ -654,7 +654,7 @@ public class AppMenu {
         ChoiceBox<Integer> installmentBox=new ChoiceBox<>();
         installmentBox.getItems().addAll(6 ,12 ,18 ,24 ,36 ,72);
         installmentBox.setValue(6);
-        grid.add(installmentBox ,2 ,2);
+        grid.add(installmentBox ,2 ,1);
         Label interest=new Label(" بهره: "+(10+installmentBox.getValue()/3)+"%");
         installmentBox.setOnAction(e -> interest.setText("بهره:"+(10+installmentBox.getValue()/3)+"%"));
         grid.add(interest ,3,2);
@@ -670,6 +670,7 @@ public class AppMenu {
             if(NumericCheck(choiceBox.getValue())){
                 Person.loan(choiceBox.getValue() ,String.valueOf(sumBox.getValue()) ,String.valueOf(installmentBox.getValue())
                         ,String.valueOf(10+installmentBox.getValue()/3));
+                show();
             }
 
         });
